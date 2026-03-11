@@ -1,67 +1,84 @@
 Class {
-	#name : 'PersistentPetStoreApplication',
-	#superclass : 'PersistentAPIApplication',
-	#category : 'Persistent-API-Skeleton-Tests',
-	#package : 'Persistent-API-Skeleton-Tests'
+	#name : #PersistentPetStoreApplication,
+	#superclass : #PersistentAPIApplication,
+	#category : #'Persistent-API-Skeleton-Tests'
 }
 
-{ #category : 'accessing' }
+{ #category : #private }
+PersistentPetStoreApplication class >> applicationBaselineName [
+
+	^ #BaselineOfStargate
+]
+
+{ #category : #private }
 PersistentPetStoreApplication class >> commandName [
 
 	^ 'persistent-pet-store'
 ]
 
-{ #category : 'accessing' }
+{ #category : #initialization }
+PersistentPetStoreApplication class >> defaultMaxActiveSessionsCount [
+
+	^ 1
+]
+
+{ #category : #initialization }
+PersistentPetStoreApplication class >> defaultMaxIdleSessionsCount [
+
+	^ 1
+]
+
+{ #category : #initialization }
+PersistentPetStoreApplication class >> defaultMinIdleSessionsCount [
+
+	^ 1
+]
+
+{ #category : #initialization }
 PersistentPetStoreApplication class >> description [
 
 	^ 'A RESTful API for Pet stores'
 ]
 
-{ #category : 'class initialization' }
+{ #category : #initialization }
 PersistentPetStoreApplication class >> initialize [
 
-  <ignoreForCoverage>
-  self initializeVersion
+	<ignoreForCoverage>
+	self initializeVersion
 ]
 
-{ #category : 'private' }
-PersistentPetStoreApplication class >> projectName [
-
-  ^ #PersistentAPISkeleton
-]
-
-{ #category : 'accessing' }
+{ #category : #initialization }
 PersistentPetStoreApplication class >> saganConfigurationParameters [
 
 	^#()
 ]
 
-{ #category : 'private' }
+{ #category : #private }
 PersistentPetStoreApplication class >> sectionsForStargateConfiguration [
 
-  ^ #( 'Pet Store' ) , super sectionsForStargateConfiguration
+	^ #( 'Pet Store' ) , super sectionsForStargateConfiguration
 ]
 
-{ #category : 'private - accessing' }
+{ #category : #'private - accessing' }
 PersistentPetStoreApplication >> controllersToInstall [
 
-  ^ { PetsRESTfulController new . PetOrdersRESTfulController new }
+	^ { PetsRESTfulController new. PetOrdersRESTfulController new }
 ]
 
-{ #category : 'private - accessing' }
+{ #category : #'private - accessing' }
 PersistentPetStoreApplication >> installation [
 
-  ^ PetStoreInstallation installedBy: self
+	^ PetStoreInstallation installedBy: self
 ]
 
-{ #category : 'private - accessing' }
+{ #category : #'private - accessing' }
 PersistentPetStoreApplication >> serviceDefinitions [
 
-  ^ #(  )
+	^ #()
 ]
 
-{ #category : 'private - accessing' }
+{ #category : #'private - accessing' }
 PersistentPetStoreApplication >> stargateConfiguration [
 
-  ^ self configuration petStore stargate
+	^self configuration petStore stargate
 ]

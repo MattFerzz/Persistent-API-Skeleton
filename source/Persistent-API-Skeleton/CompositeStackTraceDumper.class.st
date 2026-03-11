@@ -1,27 +1,26 @@
 Class {
-	#name : 'CompositeStackTraceDumper',
-	#superclass : 'StackTraceDumper',
+	#name : #CompositeStackTraceDumper,
+	#superclass : #StackTraceDumper,
 	#instVars : [
 		'dumpers'
 	],
-	#category : 'Persistent-API-Skeleton',
-	#package : 'Persistent-API-Skeleton'
+	#category : #'Persistent-API-Skeleton'
 }
 
-{ #category : 'instance creation' }
+{ #category : #'instance creation' }
 CompositeStackTraceDumper class >> composingAll: dumpers [
 
-  ^ self new initializeComposingAll: dumpers
+	^ self new initializeComposingAll: dumpers
 ]
 
-{ #category : 'error handling' }
+{ #category : #initialization }
 CompositeStackTraceDumper >> dumpStackTraceFor: anError [
 
-  dumpers do: [ :dumper | dumper dumpStackTraceFor: anError ]
+	dumpers do: [ :dumper | dumper dumpStackTraceFor: anError ]
 ]
 
-{ #category : 'initialization' }
+{ #category : #initialization }
 CompositeStackTraceDumper >> initializeComposingAll: aDumpersCollection [
 
-  dumpers := aDumpersCollection
+	dumpers := aDumpersCollection
 ]

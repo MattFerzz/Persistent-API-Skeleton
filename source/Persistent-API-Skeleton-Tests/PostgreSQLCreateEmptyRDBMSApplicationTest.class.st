@@ -1,11 +1,10 @@
 Class {
-	#name : 'PostgreSQLCreateEmptyRDBMSApplicationTest',
-	#superclass : 'CreateEmptyRDBMSApplicationTest',
-	#category : 'Persistent-API-Skeleton-Tests',
-	#package : 'Persistent-API-Skeleton-Tests'
+	#name : #PostgreSQLCreateEmptyRDBMSApplicationTest,
+	#superclass : #CreateEmptyRDBMSApplicationTest,
+	#category : #'Persistent-API-Skeleton-Tests'
 }
 
-{ #category : 'tests' }
+{ #category : #tests }
 PostgreSQLCreateEmptyRDBMSApplicationTest >> testConfigurationParameters [
 
 	| parameters parameter |

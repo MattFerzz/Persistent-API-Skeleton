@@ -1,56 +1,56 @@
 Class {
-	#name : 'SingleDatabaseRepositoryProviderModuleFactory',
-	#superclass : 'Object',
+	#name : #SingleDatabaseRepositoryProviderModuleFactory,
+	#superclass : #Object,
 	#instVars : [
-		'databaseConfiguration'
+		'databaseConfiguration',
+		'configurationAction'
 	],
-	#category : 'Persistent-API-Skeleton',
-	#package : 'Persistent-API-Skeleton'
+	#category : #'Persistent-API-Skeleton'
 }
 
-{ #category : 'instance creation' }
+{ #category : #'instance creation' }
 SingleDatabaseRepositoryProviderModuleFactory class >> configuredBy: theDatabaseConfiguration [
 
-  ^ self new initializeConfiguredBy: theDatabaseConfiguration
+	^ self configuredBy: theDatabaseConfiguration withPoolingOptions: [ :options |  ]
 ]
 
-{ #category : 'instance creation' }
+{ #category : #'instance creation' }
 SingleDatabaseRepositoryProviderModuleFactory class >> configuredBy: theDatabaseConfiguration withPoolingOptions: poolingOptionsConfigurationAction [
 
-  | options |
-  options := NeoJSONObject new.
-  poolingOptionsConfigurationAction value: options.
-  theDatabaseConfiguration keysAndValuesDo: [ :key :value | options at: key ifAbsentPut: value ].
-  self deprecated: 'Use configuredBy:, passing all keys and values to theDatabaseConfiguration'.
-  ^ self configuredBy: options
+	^ self new initializeConfiguredBy: theDatabaseConfiguration withPoolingOptions: [ :options | 
+		  theDatabaseConfiguration keysAndValuesDo: [ :key :value | options at: key ifAbsentPut: value ].
+		  poolingOptionsConfigurationAction value: options
+		  ]
 ]
 
-{ #category : 'testing' }
-SingleDatabaseRepositoryProviderModuleFactory class >> isAbstract [
+{ #category : #testing }
+SingleDatabaseRepositoryProviderModuleFactory class >> isAbstract [ 
 
-  ^ self = SingleDatabaseRepositoryProviderModuleFactory
+	^self = SingleDatabaseRepositoryProviderModuleFactory
 ]
 
-{ #category : 'private' }
+{ #category : #private }
 SingleDatabaseRepositoryProviderModuleFactory >> databaseLogin [
 
-  self subclassResponsibility
+	self subclassResponsibility
 ]
 
-{ #category : 'initialization' }
-SingleDatabaseRepositoryProviderModuleFactory >> initializeConfiguredBy: theDatabaseConfiguration [
+{ #category : #initialization }
+SingleDatabaseRepositoryProviderModuleFactory >> initializeConfiguredBy: theDatabaseConfiguration
+	withPoolingOptions: poolingOptionsConfigurationAction [
 
-  databaseConfiguration := theDatabaseConfiguration
+	databaseConfiguration := theDatabaseConfiguration.
+	configurationAction := poolingOptionsConfigurationAction
 ]
 
-{ #category : 'instance creation' }
+{ #category : #'instance creation' }
 SingleDatabaseRepositoryProviderModuleFactory >> toInstallOn: aCompositeSystem [
 
-  | login |
-  login := self databaseLogin.
-  ^ SingleDatabaseRepositoryProviderModule
-      toInstallOn: aCompositeSystem
-      usingSessionPoolWith: login
-      configuredBy: [ :options |
-        databaseConfiguration keysAndValuesDo: [ :key :value | options at: key put: value ] ]
+	| login |
+
+	login := self databaseLogin.
+	^ SingleDatabaseRepositoryProviderModule
+		  toInstallOn: aCompositeSystem
+		  usingSessionPoolWith: login
+		  configuredBy: configurationAction
 ]

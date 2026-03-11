@@ -1,21 +1,20 @@
 Class {
-	#name : 'ConfigureAllowedOrigins',
-	#superclass : 'Object',
+	#name : #ConfigureAllowedOrigins,
+	#superclass : #Object,
 	#instVars : [
 		'allowedUrls',
 		'exposedHeaders'
 	],
-	#category : 'Persistent-API-Skeleton',
-	#package : 'Persistent-API-Skeleton'
+	#category : #'Persistent-API-Skeleton'
 }
 
-{ #category : 'instance creation' }
+{ #category : #'instance creation' }
 ConfigureAllowedOrigins class >> allowing: anUrlCollection exposing: aHeaderCollection [
 
 	^ self new initializeAllowing: anUrlCollection exposing: aHeaderCollection
 ]
 
-{ #category : 'applying' }
+{ #category : #applying }
 ConfigureAllowedOrigins >> applyOn: anAPI [
 
 	anAPI allowCrossOriginSharingApplying: [ :cors |
@@ -25,13 +24,13 @@ ConfigureAllowedOrigins >> applyOn: anAPI [
 		]
 ]
 
-{ #category : 'initialization' }
+{ #category : #initialization }
 ConfigureAllowedOrigins >> initializeAllowing: anUrlCollection [
 
 	allowedUrls := anUrlCollection
 ]
 
-{ #category : 'initialization' }
+{ #category : #initialization }
 ConfigureAllowedOrigins >> initializeAllowing: anUrlCollection exposing: aHeaderCollection [
 
 	allowedUrls := anUrlCollection.

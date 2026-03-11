@@ -1,14 +1,13 @@
 Class {
-	#name : 'PersistentAPIApplication',
-	#superclass : 'ConsulAwareStargateApplication',
+	#name : #PersistentAPIApplication,
+	#superclass : #ConsulAwareStargateApplication,
 	#instVars : [
 		'rootSystem'
 	],
-	#category : 'Persistent-API-Skeleton',
-	#package : 'Persistent-API-Skeleton'
+	#category : #'Persistent-API-Skeleton'
 }
 
-{ #category : 'private' }
+{ #category : #private }
 PersistentAPIApplication class >> allowedOriginsConfigurationParameter [
 
 	^ OptionalConfigurationParameter
@@ -23,13 +22,13 @@ PersistentAPIApplication class >> allowedOriginsConfigurationParameter [
 			  [ :api | self configureAllowOrigins: webOrigins to: api ] ]
 ]
 
-{ #category : 'accessing' }
+{ #category : #accessing }
 PersistentAPIApplication class >> configurationParameters [
 
 	^ super configurationParameters , self saganConfigurationParameters
 ]
 
-{ #category : 'private' }
+{ #category : #private }
 PersistentAPIApplication class >> configureAllowOrigins: allowedOrigins to: api [
 
 	^ LogRecord
@@ -38,19 +37,19 @@ PersistentAPIApplication class >> configureAllowOrigins: allowedOrigins to: api 
 		  (ConfigureAllowedOrigins allowing: allowedOrigins exposing: self exposedHeaders) applyOn: api ]
 ]
 
-{ #category : 'private - accessing' }
+{ #category : #'private - accessing' }
 PersistentAPIApplication class >> exposedHeaders [
 
 	^ OrderedCollection with: 'Etag'
 ]
 
-{ #category : 'testing' }
+{ #category : #testing }
 PersistentAPIApplication class >> isAbstract [
 
 	^ self = PersistentAPIApplication
 ]
 
-{ #category : 'private' }
+{ #category : #private }
 PersistentAPIApplication class >> parseWebOriginsFrom: string [
 
 	^ [ (string splitOn: $,) collect: #asWebOrigin as: Array ]
@@ -67,19 +66,43 @@ PersistentAPIApplication class >> parseWebOriginsFrom: string [
 					   parameter name) ]
 ]
 
-{ #category : 'accessing' }
+{ #category : #accessing }
 PersistentAPIApplication class >> saganConfigurationParameters [
 
 	^ self subclassResponsibility
 ]
 
-{ #category : 'private' }
+{ #category : #private }
+PersistentAPIApplication class >> saganSessionPoolingConfigurationParameters [
+
+	^ Array
+		  with: ( OptionalConfigurationParameter
+				    named: 'Min Idle Sessions Count'
+				    describedBy: 'Minimum number of idle sessions to keep alive in the pool'
+				    inside: self sectionsForSaganConfiguration
+				    defaultingTo: self defaultMinIdleSessionsCount
+				    convertingWith: #asNumber )
+		  with: ( OptionalConfigurationParameter
+				    named: 'Max Idle Sessions Count'
+				    describedBy: 'Maximum number of idle sessions to keep alive in the pool'
+				    inside: self sectionsForSaganConfiguration
+				    defaultingTo: self defaultMaxIdleSessionsCount
+				    convertingWith: #asNumber )
+		  with: ( OptionalConfigurationParameter
+				    named: 'Max Active Sessions Count'
+				    describedBy: 'Maximum number of sessions alive'
+				    inside: self sectionsForSaganConfiguration
+				    defaultingTo: self defaultMaxActiveSessionsCount
+				    convertingWith: #asNumber )
+]
+
+{ #category : #private }
 PersistentAPIApplication class >> sectionsForSaganConfiguration [
 
 	^ #( 'Sagan' )
 ]
 
-{ #category : 'private' }
+{ #category : #private }
 PersistentAPIApplication class >> serviceDiscoveryHealthCheckIntervalConfigurationParameter [
 
 	^ OptionalConfigurationParameter
@@ -90,7 +113,7 @@ PersistentAPIApplication class >> serviceDiscoveryHealthCheckIntervalConfigurati
 		  convertingWith: #asNumber
 ]
 
-{ #category : 'private' }
+{ #category : #private }
 PersistentAPIApplication class >> serviceDiscoveryTimeSlotBetweenRetriesConfigurationParameter [
 
 	^ OptionalConfigurationParameter
@@ -101,7 +124,7 @@ PersistentAPIApplication class >> serviceDiscoveryTimeSlotBetweenRetriesConfigur
 		  convertingWith: #asNumber
 ]
 
-{ #category : 'private' }
+{ #category : #private }
 PersistentAPIApplication class >> serviceDiscoveryTimeoutConfigurationParameter [
 
 	^ OptionalConfigurationParameter
@@ -113,7 +136,7 @@ PersistentAPIApplication class >> serviceDiscoveryTimeoutConfigurationParameter 
 		  convertingWith: #asNumber
 ]
 
-{ #category : 'accessing' }
+{ #category : #accessing }
 PersistentAPIApplication class >> stargateConfigurationParameters [
 
 	^ super stargateConfigurationParameters , { 
@@ -123,97 +146,96 @@ PersistentAPIApplication class >> stargateConfigurationParameters [
 		  self allowedOriginsConfigurationParameter }
 ]
 
-{ #category : 'private - activation/deactivation' }
+{ #category : #'private - activation/deactivation' }
 PersistentAPIApplication >> basicStartWithin: context [
 
-  self installAndStartRootSystem.
-  self handleOptionsIn: context.
-  super basicStartWithin: context
+	self installAndStartRootSystem.
+	self handleOptionsIn: context.
+	super basicStartWithin: context
 ]
 
-{ #category : 'private - activation/deactivation' }
-PersistentAPIApplication >> basicStop [
+{ #category : #'private - activation/deactivation' }
+PersistentAPIApplication >> basicStop [ 
 
-  super basicStop.
-  LogRecord emitInfo: 'Stopping system'.
-  rootSystem ifNotNil: #shutDown
+	super basicStop.
+	LogRecord emitInfo: 'Stopping system'.
+	rootSystem ifNotNil: #shutDown
 ]
 
-{ #category : 'private - activation/deactivation' }
+{ #category : #'private - activation/deactivation' }
 PersistentAPIApplication >> configureAllowedOriginsTo: api [
 
-  self stargateConfiguration allowedOrigins value: api
+	self stargateConfiguration allowedOrigins value: api.
+	
 ]
 
-{ #category : 'private - activation/deactivation' }
+{ #category : #'private - activation/deactivation' }
 PersistentAPIApplication >> createAPI [
 
-  | api |
-  api := super createAPI.
-  self configureAllowedOriginsTo: api.
-  ^ api
+	| api |
+	api := super createAPI.
+	self configureAllowedOriginsTo: api.
+	^ api
 ]
 
-{ #category : 'private - activation/deactivation' }
+{ #category : #'private - activation/deactivation' }
 PersistentAPIApplication >> handleOptionsIn: context [
-  "I'm a template method. Subclasses can re-implement me to handle options."
 
-  
+	"I'm a template method. Subclasses can re-implement me to handle options."
 ]
 
-{ #category : 'private - activation/deactivation' }
+{ #category : #'private - activation/deactivation' }
 PersistentAPIApplication >> installAndStartRootSystem [
 
-  LogRecord emitInfo: 'Installing system'.
-  rootSystem := self installation install: self class version.
-  LogRecord emitInfo: 'Starting up system'.
-  rootSystem startUp
+	LogRecord emitInfo: 'Installing system'.
+	rootSystem := self installation install: self class version.
+	LogRecord emitInfo: 'Starting up system'.
+	rootSystem startUp
 ]
 
-{ #category : 'private - accessing' }
+{ #category : #'private - accessing' }
 PersistentAPIApplication >> installation [
 
 	^ self subclassResponsibility
 ]
 
-{ #category : 'private - accessing' }
+{ #category : #'private - accessing' }
 PersistentAPIApplication >> saganConfiguration [
 
 	^ self configuration sagan
 ]
 
-{ #category : 'private - accessing' }
+{ #category : #'private - building' }
 PersistentAPIApplication >> serviceDiscoveryHealthCheckInterval [
 
-  ^ self stargateConfiguration serviceDiscoveryHealthcheckIntervalMs milliSeconds
+	^ self stargateConfiguration serviceDiscoveryHealthcheckIntervalMs milliSeconds
 ]
 
-{ #category : 'private - accessing' }
+{ #category : #'private - building' }
 PersistentAPIApplication >> serviceDiscoveryHealthCheckTimeout [
 
 	^ self stargateConfiguration serviceDiscoveryTimeoutMs milliSeconds
 ]
 
-{ #category : 'private - accessing' }
+{ #category : #'private - building' }
 PersistentAPIApplication >> serviceDiscoveryTimeSlotBetweenRetries [
 
 	^ self stargateConfiguration serviceDiscoveryTimeSlotBetweenRetriesInMs milliSeconds
 ]
 
-{ #category : 'error handling' }
+{ #category : #'private - building' }
 PersistentAPIApplication >> stackTraceDumpFileReference [
 
-  ^ self class logsDirectory / ( '<1s>-<2s>'
-        expandMacrosWith: self class commandName
-        with: ( ( ZTimestampFormat fromString: '2001-02-03_16-05-06.07' ) format: ZTimestamp now ) )
+	^ self class logsDirectory / ( '<1s>-<2s>' expandMacrosWith: self class commandName
+		    with: ( ( ZTimestampFormat fromString: '2001-02-03_16-05-06.07' ) format: ZTimestamp now ) )
 ]
 
-{ #category : 'error handling' }
+{ #category : #'private - building' }
 PersistentAPIApplication >> stackTraceDumper [
 
-  ^ CompositeStackTraceDumper composingAll: {
-        StackTraceTextDumper on: [ :dumpAction |
-            ( self stackTraceDumpFileReference withExtension: 'log' ) writeStreamDo: dumpAction ] .
-        StackTraceBinarySerializer on: [ :dumpAction |
-            ( self stackTraceDumpFileReference withExtension: 'fuel' ) binaryWriteStreamDo: dumpAction ] }
+	^ CompositeStackTraceDumper composingAll: {
+			  ( StackTraceTextDumper on: [ :dumpAction |
+				    ( self stackTraceDumpFileReference withExtension: 'log' ) writeStreamDo: dumpAction ] ).
+			  ( StackTraceBinarySerializer on: [ :dumpAction |
+				    ( self stackTraceDumpFileReference withExtension: 'fuel' ) binaryWriteStreamDo: dumpAction ] ) }
 ]

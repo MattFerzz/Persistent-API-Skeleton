@@ -1,33 +1,32 @@
 Class {
-	#name : 'ConfigureAllowedOriginsTest',
-	#superclass : 'TestCase',
+	#name : #ConfigureAllowedOriginsTest,
+	#superclass : #TestCase,
 	#instVars : [
 		'allowedOrigins',
 		'exposedHeaders'
 	],
-	#category : 'Persistent-API-Skeleton-Tests',
-	#package : 'Persistent-API-Skeleton-Tests'
+	#category : #'Persistent-API-Skeleton-Tests'
 }
 
-{ #category : 'Mocking' }
+{ #category : #Mocking }
 ConfigureAllowedOriginsTest >> allowCrossOriginSharingApplying: aOneArgBlock [
 
 	aOneArgBlock value: self
 ]
 
-{ #category : 'Mocking' }
+{ #category : #Mocking }
 ConfigureAllowedOriginsTest >> allowOnlyFrom: aCollection [
 
 	allowedOrigins := aCollection
 ]
 
-{ #category : 'Mocking' }
+{ #category : #Mocking }
 ConfigureAllowedOriginsTest >> expose: aCollection [
 
 	exposedHeaders := aCollection
 ]
 
-{ #category : 'tests' }
+{ #category : #tests }
 ConfigureAllowedOriginsTest >> testApplyOnNoOriginsAllowed [
 
 	( ConfigureAllowedOrigins allowing: #(  ) exposing: #(  ) ) applyOn: self.
@@ -37,14 +36,16 @@ ConfigureAllowedOriginsTest >> testApplyOnNoOriginsAllowed [
 		assert: exposedHeaders isEmpty
 ]
 
-{ #category : 'tests' }
+{ #category : #tests }
 ConfigureAllowedOriginsTest >> testApplyOnOneOriginAllowed [
 
-  ( ConfigureAllowedOrigins allowing: #( 'http://allowed-origin-test/' ) exposing: #( 'Etag' ) )
-    applyOn: self.
+	( ConfigureAllowedOrigins
+		  allowing: ( Array with: 'http://allowed-origin-test/' )
+		  exposing: ( Array with: 'Etag' ) ) applyOn: self.
 
-  self
-    withTheOnlyOneIn: allowedOrigins
-    do: [ :allowedOrigin | self assert: allowedOrigin equals: 'http://allowed-origin-test/' ];
-    withTheOnlyOneIn: exposedHeaders do: [ :header | self assert: header equals: 'Etag' ]
+	self
+		assert: allowedOrigins size equals: 1;
+		assert: allowedOrigins first equals: 'http://allowed-origin-test/';
+		assert: exposedHeaders size equals: 1;
+		assert: exposedHeaders first equals: 'Etag'
 ]

@@ -1,105 +1,191 @@
 Class {
-	#name : 'CreateEmptyRDBMSApplication',
-	#superclass : 'LaunchpadApplication',
+	#name : #CreateEmptyRDBMSApplication,
+	#superclass : #LaunchpadApplication,
 	#classInstVars : [
 		'Version'
 	],
-	#category : 'Persistent-API-Skeleton',
-	#package : 'Persistent-API-Skeleton'
+	#category : #'Persistent-API-Skeleton'
 }
 
-{ #category : 'accessing' }
+{ #category : #accessing }
+CreateEmptyRDBMSApplication class >> applicationBaselineName [
+
+	self subclassResponsibility
+]
+
+{ #category : #accessing }
 CreateEmptyRDBMSApplication class >> commandName [
 
-  ^ 'create-empty-rdbms'
+	^ 'create-empty-rdbms'
 ]
 
-{ #category : 'accessing' }
+{ #category : #accessing }
 CreateEmptyRDBMSApplication class >> configurationParameters [
 
-  ^ self saganConfigurationParameters
+	^ self saganConfigurationParameters
 ]
 
-{ #category : 'accessing' }
+{ #category : #private }
+CreateEmptyRDBMSApplication class >> defaultMaxActiveSessionsCount [
+
+	^ 5
+]
+
+{ #category : #private }
+CreateEmptyRDBMSApplication class >> defaultMaxConnectionAttemps [
+
+	^ 3
+]
+
+{ #category : #private }
+CreateEmptyRDBMSApplication class >> defaultMaxIdleSessionsCount [
+
+	^ 5
+]
+
+{ #category : #private }
+CreateEmptyRDBMSApplication class >> defaultMinIdleSessionsCount [
+
+	^ 2
+]
+
+{ #category : #private }
+CreateEmptyRDBMSApplication class >> defaultTimeSlotBetweenConnectionRetries [
+
+	^ Duration milliSeconds: 3000
+]
+
+{ #category : #accessing }
 CreateEmptyRDBMSApplication class >> description [
 
-  ^ 'Creates the database structure'
+	^ 'Creates the database structure'
 ]
 
-{ #category : 'private' }
+{ #category : #private }
 CreateEmptyRDBMSApplication class >> fileReferenceToDumpStackTrace [
 
 	^ self logsDirectory / ( '<1s>-<2s>.fuel' expandMacrosWith: self commandName
 		    with: ( ( ZTimestampFormat fromString: '2001-02-03_16-05-06.07' ) format: ZTimestamp now ) )
 ]
 
-{ #category : 'initialization' }
+{ #category : #initialization }
 CreateEmptyRDBMSApplication class >> initializeVersion [
 
 	<ignoreForCoverage>
-	Version := VersionFromRepositoryResolver new valueFor: self projectName
+	Version := VersionFromRepositoryResolver new valueFor: self applicationBaselineName
 ]
 
-{ #category : 'testing' }
+{ #category : #testing }
 CreateEmptyRDBMSApplication class >> isAbstract [
 
 	^ self = CreateEmptyRDBMSApplication
 ]
 
-{ #category : 'private' }
+{ #category : #private }
 CreateEmptyRDBMSApplication class >> logsDirectory [
 
 	^ ( FileLocator workingDirectory / 'logs' ) ensureCreateDirectory
 ]
 
-{ #category : 'accessing' }
-CreateEmptyRDBMSApplication class >> projectName [
+{ #category : #private }
+CreateEmptyRDBMSApplication class >> saganBasicConfigurationParameters [
 
-  self subclassResponsibility
+	^ OrderedCollection new
+		  add: ( OptionalConfigurationParameter
+				    named: 'Log Database Events'
+				    describedBy: 'A boolean indicating whether should log database events or not'
+				    inside: self sectionsForSaganConfiguration
+				    defaultingTo: false
+				    convertingWith: #asBoolean );
+		  add: ( OptionalConfigurationParameter
+				    named: 'Maximum Connection Attemps'
+				    describedBy: 'Number of retries login database attempts'
+				    inside: self sectionsForSaganConfiguration
+				    defaultingTo: self defaultMaxConnectionAttemps
+				    convertingWith: #asNumber );
+		  add: ( OptionalConfigurationParameter
+				    named: 'Time Slot Between Connection Retries In ms'
+				    describedBy: 'Timeframe in milliseconds to wait before retrying a login to database'
+				    inside: self sectionsForSaganConfiguration
+				    defaultingTo: self defaultTimeSlotBetweenConnectionRetries
+				    convertingWith: [ :parameter | Duration milliSeconds: parameter asNumber ] );
+		  yourself
 ]
 
-{ #category : 'accessing' }
+{ #category : #accessing }
 CreateEmptyRDBMSApplication class >> saganConfigurationParameters [
 
-  self subclassResponsibility
+	self subclassResponsibility
 ]
 
-{ #category : 'accessing' }
+{ #category : #private }
+CreateEmptyRDBMSApplication class >> saganSessionPoolingConfigurationParameters [
+
+	^ OrderedCollection new
+		  add: ( OptionalConfigurationParameter
+				    named: 'Min Idle Sessions Count'
+				    describedBy: 'Minimum number of idle sessions to keep alive in the pool'
+				    inside: self sectionsForSaganConfiguration
+				    defaultingTo: self defaultMinIdleSessionsCount
+				    convertingWith: #asNumber );
+		  add: ( OptionalConfigurationParameter
+				    named: 'Max Idle Sessions Count'
+				    describedBy: 'Maximum number of idle sessions to keep alive in the pool'
+				    inside: self sectionsForSaganConfiguration
+				    defaultingTo: self defaultMaxIdleSessionsCount
+				    convertingWith: #asNumber );
+		  add: ( OptionalConfigurationParameter
+				    named: 'Max Active Sessions Count'
+				    describedBy: 'Maximum number of sessions alive'
+				    inside: self sectionsForSaganConfiguration
+				    defaultingTo: self defaultMaxActiveSessionsCount
+				    convertingWith: #asNumber );
+		  yourself
+]
+
+{ #category : #accessing }
+CreateEmptyRDBMSApplication class >> sectionsForSaganConfiguration [
+
+	^ #( 'Sagan' )
+]
+
+{ #category : #versions }
 CreateEmptyRDBMSApplication class >> version [
 
-  ^ Version
+	^ Version
 ]
 
-{ #category : 'private - activation/deactivation' }
+{ #category : #'private - activation' }
 CreateEmptyRDBMSApplication >> basicStartWithin: context [
 
-  | rootSystem |
-  LogRecord emitInfo: 'Installing system'.
-  rootSystem := self installation install: self class version.
-  LogRecord emitInfo: 'Starting up system'.
-  rootSystem startUp.
-  LogRecord emitInfo: 'Setting up database structure'.
-  ( rootSystem >> #RepositoryProviderSystem ) prepareForInitialPersistence.
-  LogRecord emitInfo: 'Shutting down system'.
-  rootSystem shutDown.
-  self exitSuccess
+	| rootSystem |
+
+	LogRecord emitInfo: 'Installing system'.
+	rootSystem := self installation install: self class version.
+	LogRecord emitInfo: 'Starting up system'.
+	rootSystem startUp.
+	LogRecord emitInfo: 'Setting up database structure'.
+	( rootSystem >> #RepositoryProviderSystem ) prepareForInitialPersistence.
+	LogRecord emitInfo: 'Shutting down system'.
+	rootSystem shutDown.
+	self exitSuccess
 ]
 
-{ #category : 'private - accessing' }
+{ #category : #'private - accessing' }
 CreateEmptyRDBMSApplication >> installation [
 
-  ^ self subclassResponsibility
+	^ self subclassResponsibility
 ]
 
-{ #category : 'private - accessing' }
+{ #category : #'private - accessing' }
 CreateEmptyRDBMSApplication >> saganConfiguration [
 
-  ^ self configuration sagan
+	^ self configuration sagan
 ]
 
-{ #category : 'error handling' }
+{ #category : #'error handling' }
 CreateEmptyRDBMSApplication >> stackTraceDumper [
 
-  ^ StackTraceBinarySerializer on: [ :dumpAction |
-        self class fileReferenceToDumpStackTrace binaryWriteStreamDo: dumpAction ]
+	^ StackTraceBinarySerializer on: [ :dumpAction | 
+		  self class fileReferenceToDumpStackTrace binaryWriteStreamDo: dumpAction ]
 ]
